@@ -17,6 +17,10 @@ define([
   "hbs!app/templates/note",
   "hbs!app/templates/notes",
 
+  // App dependencies
+  "app/models/note",
+  "app/collections/notes",
+
   // Polyfill JSON for old browsers.
   "json2",
   "backbone.localStorage"
@@ -25,7 +29,9 @@ define([
   _,
   Backbone,
   noteTmpl,
-  notesTmpl
+  notesTmpl,
+  NoteModel,
+  NotesCollection
 ) {
   "use strict";
 
@@ -34,16 +40,6 @@ define([
   // --------------------------------------------------------------------------
   // Let's write a very simple Backbone model, and bind that with a template
   // to a view.
-
-  var NoteModel = Backbone.Model.extend({
-    urlRoot: "/notes", // :id
-    defaults: { title: "", text: "*Add Note!*" }
-  });
-
-  var NotesCollection = Backbone.Collection.extend({
-    model: NoteModel,
-    localStorage: new Backbone.LocalStorage("bb-col-demo")
-  });
 
   var notesCollection = new NotesCollection();
   // CLEAR:
