@@ -13,10 +13,7 @@ define([
   "backbone",
 
   // Import and compile a HBS template.
-  // For real application, remove this import (and the real file) and replace
-  // with imports for your Backbone components needed to bootstrap the full
-  // application. Likely this means a collection and router.
-  "hbs!app/templates/hello",
+  "hbs!app/templates/note",
 
   // Polyfill JSON for old browsers.
   "json2",
@@ -24,7 +21,7 @@ define([
 ], function (
   $,
   Backbone,
-  helloTmpl
+  noteTmpl
 ) {
   "use strict";
   var console = window.console;
@@ -54,13 +51,12 @@ define([
   //   notesCollection.create({ title: msg, text: msg });
   // });
   notesCollection.fetch();
-  notesCollection.chain()
-    .filter(function(model) {
-      return /o/.test(model.get("text"));
-    })
-    .each(function (model){
-      console.log("HAS O:"+JSON.stringify(model.toJSON()));
-    });
+
+  var $note = $("<div><h1>My Notes</h1><div id='note' /></div>");
+
+  var noteModel = notesCollection.at(0);
+  var rendered = noteTmpl(noteModel.toJSON());
+  $note.append(rendered);
 
   // --------------------------------------------------------------------------
   // Application Bootstrap
@@ -72,6 +68,6 @@ define([
   // on page load.
   $(function() {
     $("body")
-      .append($("<h2>Hello world</h2>"));
+      .append($note);
   });
 });
