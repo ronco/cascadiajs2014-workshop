@@ -63,12 +63,25 @@ define([
     el: "#note",
     initialize: function(opts) {
       if (!this.model) {throw new Error("MODEL!!!"); }
-        this.listenTo(this.model, "change", this.render);
+      this.listenTo(this.model, "change", this.render);
     },
     render: function() {
       this.$el.html(this.template(this.model.toJSON()));
     }
   });
+
+  var NotesView = Backbone.View.extend({
+    template: notesTmpl,
+    el: "#notes",
+    initialize: function(opts) {
+      if (!this.collection) {throw new Error("COLLECTION!!!"); }
+      this.listenTo(this.collection, "change", this.render);
+    },
+    render: function() {
+      this.$el.html(this.template(this.collection.toJSON()));
+    }
+  });
+
 
 
   // --------------------------------------------------------------------------
@@ -87,6 +100,10 @@ define([
       model: notesCollection.at(0)
     });
     noteView.render();
-    notesCollection.at(0).set("title", "cascadiaJS");
+
+    var notesView = new NotesView({
+      collection: notesCollection
+    });
+    notesView.render();
   });
 });
