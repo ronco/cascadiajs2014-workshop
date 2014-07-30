@@ -19,13 +19,15 @@ define([
   "hbs!app/templates/hello",
 
   // Polyfill JSON for old browsers.
-  "json2"
+  "json2",
+  "backbone.localStorage"
 ], function (
   $,
   Backbone,
   helloTmpl
 ) {
   "use strict";
+  var console = window.console;
 
   // --------------------------------------------------------------------------
   // Backbone.js Components.
@@ -33,47 +35,32 @@ define([
   // Let's write a very simple Backbone model, and bind that with a template
   // to a view.
 
-  // Backbone.js Model
-  //
-  // The model contains the data. Typically this is sync'ed with remote or
-  // local storage.
-  var HelloModel = Backbone.Model.extend({
-    // Backend REST url prefix.
-    urlRoot: "/hello",
-
-    // Default values.
-    defaults: {
-      id: 0,
-      message: "I am the default message"
-    }
+  var NoteModel = Backbone.Model.extend({
+    urlRoot: "/notes", // :id
+    defaults: { title: "", text: "*Add Note!*" }
   });
 
-  // Backbone.js View
-  //
-  // The view binds model (or collection) data to a Handlebars template and
-  // attaches that to the page HTML. It also controls other behaviors.
-  var HelloView = Backbone.View.extend({
-
-    // HTML element to attach to.
-    el: ".hello",
-
-    // Model data to use (unless one is passed to constructor).
-    model: new HelloModel(),
-
-    // Template to bind data to.
-    template: helloTmpl,
-
-    // Function to actually bind all of the above together.
-    render: function () {
-      // Get model JSON data,
-      // Add to template and render,
-      // Replace existing element HTML!
-      this.$el.html(this.template(this.model.toJSON()));
-
-      // `render` should always return `this` by convention.
-      return this;
-    }
+  var NotesCollection = Backbone.Collection.extend({
+    model: NoteModel,
+    localStorage: new Backbone.LocalStorage("bb-col-demo")
   });
+
+  var notesCollection = new NotesCollection();
+  // CLEAR:
+  // notesCollection.localStorage._clear();
+  // FETCH: notesCollection.fetch({ reset: true });
+
+  // _.each(["Hi", "Hello", "Hola"], function (msg) {
+  //   notesCollection.create({ title: msg, text: msg });
+  // });
+  notesCollection.fetch();
+  notesCollection.chain()
+    .filter(function(model) {
+      return /o/.test(model.get("text"));
+    })
+    .each(function (model){
+      console.log("HAS O:"+JSON.stringify(model.toJSON()));
+    });
 
   // --------------------------------------------------------------------------
   // Application Bootstrap
@@ -83,21 +70,8 @@ define([
   // **Note**: The `app.js` file is usually just comprised of **imports**
   // of the individual Backbone.js components above and the below function
   // on page load.
-  $(function () {
-    // Now instantiate our view and render!
-    var helloView = new HelloView();
-
-    // Update the model data. Without, renders `defaults.message`.
-    helloView.model.fetch()
-      .done(function () {
-        // Success!
-        helloView.render();
-      })
-      .fail(function (jqXHR, textStatus) {
-        // Failure!
-        var err = jqXHR.responseText || jqXHR.statusText || textStatus;
-        helloView.$el.html(
-          "<div>Model fetch failed with: <code>" + err + "</code></div>");
-      });
+  $(function() {
+    $("body")
+      .append($("<h2>Hello world</h2>"));
   });
 });
