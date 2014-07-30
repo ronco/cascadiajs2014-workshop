@@ -10,21 +10,24 @@
  */
 define([
   "jquery",
+  "underscore",
   "backbone",
 
   // Import and compile a HBS template.
   "hbs!app/templates/note",
+  "hbs!app/templates/notes",
 
   // Polyfill JSON for old browsers.
   "json2",
   "backbone.localStorage"
 ], function (
   $,
+  _,
   Backbone,
-  noteTmpl
+  noteTmpl,
+  notesTmpl
 ) {
   "use strict";
-  var console = window.console;
 
   // --------------------------------------------------------------------------
   // Backbone.js Components.
@@ -52,11 +55,21 @@ define([
   // });
   notesCollection.fetch();
 
-  var $note = $("<div><h1>My Notes</h1><div id='note' /></div>");
+  var $note = $("<div><h1>One Note</h1><div id='note' /></div>");
+  var $notes = $("<div><h1>My Notes</h1><div id='notes' /></div>");
 
-  var noteModel = notesCollection.at(0);
-  var rendered = noteTmpl(noteModel.toJSON());
-  $note.append(rendered);
+  var NoteView = Backbone.View.extend({
+    template: noteTmpl,
+    el: "#note",
+    initialize: function(opts) {
+      if (!this.model) {throw new Error("MODEL!!!"); }
+        this.listenTo(this.model, "change", this.render);
+    },
+    render: function() {
+      this.$el.html(this.template(this.model.toJSON()));
+    }
+  });
+
 
   // --------------------------------------------------------------------------
   // Application Bootstrap
@@ -68,6 +81,12 @@ define([
   // on page load.
   $(function() {
     $("body")
-      .append($note);
+      .append($note)
+      .append($notes);
+    var noteView = new NoteView({
+      model: notesCollection.at(0)
+    });
+    noteView.render();
+    notesCollection.at(0).set("title", "cascadiaJS");
   });
 });
