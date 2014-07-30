@@ -83,6 +83,33 @@ define([
   });
 
 
+  var Router = Backbone.Router.extend({
+    routes: {
+      "": "notes",
+      ":id": "note"
+    },
+    notes: function () {
+      $note.hide();
+      $notes.show();
+      var notesView = new NotesView({
+        collection: notesCollection
+      });
+
+      notesView.render();
+    },
+    note: function (id) {
+      id = parseInt(id, 10);
+
+      $notes.hide();
+      $note.show();
+
+      var noteView = new NoteView({
+        model: notesCollection.at(id)
+      });
+      noteView.render();
+    }
+  });
+
 
   // --------------------------------------------------------------------------
   // Application Bootstrap
@@ -96,14 +123,10 @@ define([
     $("body")
       .append($note)
       .append($notes);
-    var noteView = new NoteView({
-      model: notesCollection.at(0)
-    });
-    noteView.render();
 
-    var notesView = new NotesView({
-      collection: notesCollection
-    });
-    notesView.render();
+
+    var router = new Router();
+    Backbone.History.started || Backbone.history.start();
+
   });
 });
